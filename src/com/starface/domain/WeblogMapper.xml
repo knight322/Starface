@@ -1,0 +1,601 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.starface.domain.WebolgMapper" >
+	
+	<!-- 保存日志 -->
+	<insert id="insertWeblog" parameterType="com.starface.domain.Weblog"  useGeneratedKeys="true" keyProperty="id">
+		insert into t_weblog(user_id,is_private,content,type,create_time,address)
+		values(#{userId},#{isPrivate},#{content},#{type},#{createTime},#{address})
+	</insert>
+	
+	<!-- 保存日志文件 -->
+	<insert id="insertWeblogFile" parameterType="com.starface.domain.WeblogFile">
+		insert into t_weblog_file(path,type,weblog_id,create_time)
+		values(#{path},#{type},#{weblogId},#{createTime})
+	</insert>
+	<!-- 保存日志评论 -->
+	<insert id="insertWeblogComment" parameterType="com.starface.domain.WeblogComment">
+		insert into t_weblog_comment(user_id,weblog_id,content,create_time)
+		values(#{userId},#{weblogId},#{content},#{createTime})
+	</insert>
+	
+	<update id="updateWeblog" parameterType="com.starface.domain.Weblog">
+		update t_weblog 
+		<set>
+			<if test="commentCount != null">comment_count = #{commentCount}</if>
+			<if test="praiseCount != null"> praise_count = #{praiseCount}</if>
+		</set>
+		<where>
+			id = #{id}
+		</where>
+	</update>
+	<!-- 更新日志评论数 -->
+	<update id="updateWeblogCommentCount" parameterType="com.starface.domain.Weblog">
+		update t_weblog set comment_count = (
+			select count(1) cnt from t_weblog_comment b where b.weblog_id = #{id}
+		) where id = #{id}
+	</update>
+	<!-- 更新日志点赞数 -->
+	<update id="updateWeblogPraiseCount" parameterType="com.starface.domain.Weblog">
+		update t_weblog set praise_count = (
+			select count(1) cnt from t_weblog_praise b where b.weblog_id = #{id}
+		) where id = #{id}
+	</update>
+	
+	<!-- 删除日志评论 -->
+	<delete id="deleteWeblogComment" parameterType="com.starface.domain.WeblogComment">
+		delete from t_weblog_comment where id = #{id} and user_id = #{userId}
+	</delete>
+	<!-- 根据ID获取评论 -->
+	<select id="selectWeblogCommentById" parameterType="com.starface.domain.WeblogComment" resultType="com.starface.domain.WeblogComment">
+		select id,user_id userId,weblog_id weblogId,content,create_time createTime from t_weblog_comment where id = #{id}
+	</select>
+	
+	<!-- 保存日志点赞 -->
+	<insert id="insertWeblogPraise" parameterType="com.starface.domain.WeblogPraise">
+		insert into t_weblog_praise(user_id,weblog_id,create_time,type)
+		values(#{userId},#{weblogId},#{createTime},#{type})
+	</insert>
+	
+	<!-- 根据ID获取点赞 -->
+	<select id="selectWeblogPraiseById" parameterType="com.starface.domain.WeblogPraise" 
+		resultType="com.starface.domain.WeblogPraise">
+		select id,user_id userId,weblog_id weblogId,type,create_time createTime from t_weblog_praise 
+		where user_id = #{userId} and weblog_id = #{weblogId}
+	</select>
+	<!-- 删除点赞记录 -->
+	<delete id="deleteWeblogPraise"  parameterType="com.starface.domain.WeblogPraise" >
+		delete from t_weblog_praise where user_id = #{userId} and weblog_id = #{weblogId}
+	</delete>
+	<!-- 根据ID获取日志 -->
+	<select id="selectWeblogById" parameterType="com.starface.domain.Weblog" resultType="com.starface.domain.Weblog">
+		select id,user_id userId,is_private isPrivate,type,content,comment_count commentCount,praise_count praiseCount,
+		create_time	 createTime from t_weblog where id = #{id}
+	</select>
+	
+	<!-- 根据ID获取日志 -->
+	<select id="selectWeblogByIdForVo" parameterType="com.starface.domain.Weblog" resultType="com.starface.domain.vo.WeblogManagerVo">
+		select id,user_id userId,is_private isPrivate,type,content,comment_count commentCount,praise_count praiseCount,
+		create_time createTime,date_format(create_time,'%Y-%m-%d %H:%i:%s') createTimeView from t_weblog where id = #{id}
+	</select>
+	
+	<!-- 删除点赞记录,根据日志ID -->
+	<delete id="deleteWeblogPraiseByWeblogId"  parameterType="com.starface.domain.Weblog" >
+		delete from t_weblog_praise where weblog_id = #{id}
+	</delete>
+
+	<!-- 删除日志评论,根据日志ID -->
+	<delete id="deleteWeblogCommentByWeblogId" parameterType="com.starface.domain.Weblog">
+		delete from t_weblog_comment where  weblog_id = #{id}
+	</delete>
+		
+	<!-- 删除日志,根据日志ID -->
+	<delete id="deleteWeblogById" parameterType="com.starface.domain.Weblog">
+		delete from t_weblog where id = #{id}
+	</delete>
+	
+	<!-- 添加收藏 -->
+	<insert id="insertWeblogFavorite" parameterType="com.starface.domain.WeblogFavorite">
+		insert into t_weblog_favorite(user_id,weblog_id,create_time,is_private)
+		values(#{userId},#{weblogId},#{createTime},#{isPrivate})
+	</insert>
+	<!-- 检查收藏是否存在 -->
+	<select id="selectWeblogFavorite"  parameterType="com.starface.domain.WeblogFavorite" 
+		resultType="com.starface.domain.WeblogFavorite">
+		select id,user_id userId,weblog_id weblogId ,create_time createTime,is_private isPrivate from 
+		t_weblog_favorite where user_id = #{userId} and weblog_id = #{weblogId}	
+	</select>
+	<!-- 收藏列表 -->
+	
+	
+	<!-- 删除收藏 -->
+	<delete id="deleteWeblogFavorite" parameterType="com.starface.domain.WeblogFavorite">
+		delete from t_weblog_favorite where user_id = #{userId} and weblog_id = #{weblogId}
+	</delete>
+	<!-- 根据用户ID查询日志列表 -->
+	<select id="selectWeblogListByUserId" parameterType="java.util.HashMap" resultType="com.starface.domain.Weblog">
+		select a.id,a.user_id userId,a.is_private isPrivate,a.type,a.content,a.comment_count commentCount,a.praise_count praiseCount,
+		a.create_time createTime,a.address,b.user_icon userIcon,b.nick_name nickName,b.code_name codeName 
+		from t_weblog a left join t_users b on a.user_id = b.id where a.user_id = #{weblogVo.userId} 
+		and a.id &lt;= #{nextCursor} 
+		<if test="friend == 1"> and a.is_private in (0,1,2) </if>
+		  order by a.id desc limit 0,15
+	</select>
+	
+	<!-- 根据用户ID查询日志列表 -->
+	<select id="selectFriendWeblogListByOwnerId" parameterType="com.starface.domain.vo.UserRelationData" resultType="com.starface.domain.Weblog">
+		select a.id,a.user_id userId,a.is_private isPrivate,a.type,a.content,a.comment_count commentCount,a.praise_count praiseCount,
+		a.create_time createTime,a.address,b.user_icon userIcon,b.nick_name nickName,b.code_name codeName 
+		from t_weblog a left join t_users b on a.user_id = b.id where a.user_id = #{friendUserId} 
+		and a.id &lt;= #{nextCursor} 
+		<if test="relation == 1"> and a.is_private in (0,1) </if>
+		<if test="relation == 2 || relation == 0"> and a.is_private = 0 </if>
+		  order by a.id desc limit 0,15
+	</select>
+	
+	
+	<!-- 好友日志列表 -->
+	<select id="selectWeblogListByFriend" parameterType="java.util.HashMap" resultType="com.starface.domain.vo.WeblogFriendVo">
+		select a.id,a.user_id userId,a.is_private isPrivate,a.type,a.content,a.comment_count commentCount,a.praise_count praiseCount,
+		a.create_time createTime,c.name,c.nick_name nickName,c.code_name codeName,a.address,c.user_icon userIcon from t_weblog a left join t_user_relation b on a.user_id = b.friend_username and b.status = 1
+		 left join t_users c on a.user_id = c.id  
+		 where b.owner_username = #{weblogVo.userId} and a.id &lt;= #{nextCursor} and a.is_private in (0,1)
+		  order by a.id desc limit 0,15
+	</select>
+	
+	<!-- 好友日志列表 -->
+	<select id="selectWeblogListByAll" parameterType="java.util.HashMap" resultType="com.starface.domain.vo.WeblogFriendVo">
+		select a.id,a.user_id userId,a.is_private isPrivate,a.type,a.content,a.comment_count commentCount,a.praise_count praiseCount,
+		a.create_time createTime,c.name,c.nick_name nickName,c.code_name codeName,a.address,c.user_icon userIcon from t_weblog a 
+		 left join t_users c on a.user_id = c.id  
+		 where a.id &lt;= #{nextCursor} and a.is_private = 0
+		  order by a.id desc limit 0,15
+	</select>
+	
+	<!-- 好友日志列表 -->
+	<select id="weblogListByPraise" parameterType="java.util.HashMap" resultType="com.starface.domain.vo.WeblogFriendVo">
+		select a.id,a.user_id userId,a.is_private isPrivate,a.type,a.content,a.comment_count commentCount,a.praise_count praiseCount,
+		a.create_time createTime,c.name,c.nick_name nickName,c.code_name codeName,a.address,c.user_icon userIcon  from t_weblog a left join 
+		(
+		select * from (select weblog_id,count(1) cnt from t_weblog_praise group by weblog_id ) a 
+		) b  on a.id = b.weblog_id left join t_users c on a.user_id = c.id  and a.is_private in (0,1) 
+		order by b.cnt desc limit #{nextCursor},15
+	</select>
+	
+	<!-- 根据用户ID查询日志列表 -->
+	<select id="selectWeblogNextId" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		select id minId from t_weblog where user_id = #{weblogVo.userId} and id &lt;= #{nextCursor} 
+		<if test="friend == 1"> and is_private in (0,1) </if>
+		order by id desc limit 15,1
+	</select>
+	
+	
+	<!-- 根据用户ID查询日志列表 -->
+	<select id="selectFriendWeblogNextIdByOwnerId" parameterType="com.starface.domain.vo.UserRelationData" resultType="java.lang.Integer">
+		select id minId from t_weblog where user_id = #{friendUserId} and id &lt;= #{nextCursor} 
+		<if test="relation == 1"> and is_private in (0,1) </if>
+		<if test="relation == 2 || relation == 0"> and is_private =0 </if>
+		order by id desc limit 15,1
+	</select>
+	
+	<!-- 根据用户ID查询日志列表 -->
+	<select id="selectWeblogFriendNextId" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		select a.id minId from t_weblog a left join t_user_relation b on a.user_id = b.friend_username
+		 and b.status = 1 where owner_username = #{weblogVo.userId} and a.id &lt;= #{nextCursor} order by a.id desc 
+		 limit 15,1
+	</select>
+	
+	<!-- 根据用户ID查询日志列表 -->
+	<select id="selectWeblogAllNextId" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		select a.id minId from t_weblog a where a.is_private = 0 and a.id &lt;= #{nextCursor} order by a.id desc 
+		 limit 15,1
+	</select>
+	
+	<!-- 根据日志ID查询用户评论列表 -->
+	<select id="selectWeblogCommentListByWeblogid" parameterType="java.util.HashMap" 
+		resultType="com.starface.domain.vo.WeblogCommentListVo">
+		select a.id,a.user_id userId,a.weblog_id weblogId,a.content
+		,a.create_time createTime,b.user_name userName,b.user_icon userIcon,b.name,b.nick_name nickName,b.code_name codeName
+		from t_weblog_comment a left join t_users b on a.user_id = b.id
+		where a.weblog_id = #{weblogVo.id} and a.id &gt;= #{nextCursor} order by a.id asc limit 0,15
+	</select>
+	
+	<!-- 获取日志评论下一个ID -->
+	<select id="selectWeblogCommentNextId" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		select a.id
+		from t_weblog_comment a 
+		where a.weblog_id = #{weblogVo.id} and a.id &gt;= #{nextCursor} order by a.id asc limit 15,1
+	</select>
+	
+	<!-- 获取点赞列表最小ID -->
+	<select id="selectWeblogPraiseMaxId" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+		select min(a.id) from t_weblog_praise a where a.weblog_id = #{weblogId} 
+	</select>
+	
+	<!-- 根据日志ID查询用户点赞列表 -->
+	<select id="selectWeblogPraiseListByWeblogid" parameterType="java.util.HashMap" resultType="com.starface.domain.vo.WeblogPraiseListVo">
+		select a.id,a.user_id userId,a.weblog_id weblogId,a.create_time createTime,a.type
+		,b.user_name userName,b.user_icon userIcon,b.name,b.nick_name nickName,b.code_name codeName 
+		from t_weblog_praise a left join t_users b on a.user_id = b.id
+		where a.weblog_id = #{weblogVo.id} and a.id &gt;= #{nextCursor} order by a.id asc limit 0,15
+	</select>
+	
+	<!-- 获取日志点赞下一个ID -->
+	<select id="selectWeblogPraiseNextId" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		select a.id
+		from t_weblog_praise a 
+		where a.weblog_id = #{weblogVo.id} and a.id &gt;= #{nextCursor} order by a.id asc limit 15,1
+	</select>
+	
+	<!-- 根据ID获取日志文件列表 -->
+	<select id="selectWeblogFileListByWeblogId" parameterType="com.starface.domain.Weblog" resultType="com.starface.domain.WeblogFile">
+		select id,weblog_id weblogId,path,type,create_time createTime from t_weblog_file where weblog_id = #{id}
+	</select>
+	<!-- 获取我的日志最大ID -->
+	<select id="selectWeblogMaxId" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+		select max(id) maxId from t_weblog where user_id = #{userId}
+	</select>
+	
+	<!-- 获取好友日志最大ID -->
+	<select id="selectFriendWeblogMaxId" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+		select max(a.id) from t_weblog a left join t_user_relation b on a.user_id = b.friend_username
+		 and b.status = 1 where b.owner_username = #{userId}
+	</select>
+	
+	<!-- 获取好友日志最大ID -->
+	<select id="selectAllWeblogMaxId" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+		select max(a.id) from t_weblog a where a.is_private = 0
+	</select>
+	
+	<!-- 获取按评论排序最大ID -->
+	<select id="selectCommentWeblogMaxId" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+		select weblog_id from (select weblog_id,count(1) cnt from t_weblog_comment group by weblog_id ) a order by cnt desc limit 1
+	</select>
+	
+	<!-- 收藏列表 -->
+	<select id="selectFavoriteList" parameterType="java.util.HashMap" resultType="com.starface.domain.vo.WeblogFavoriteVo">
+		select a.id,a.user_id userId,a.weblog_id weblogId,a.create_time createTime,a.is_private isPrivate,b.content 
+		,b.address from t_weblog_favorite a left join t_weblog b on a.weblog_id = b.id and a.user_id = #{weblogVo.userId} 
+		and a.id &lt;= #{nextCursor} order by a.id desc limit 0,15
+	</select>
+	
+	<!-- 收藏最大ID -->
+	<select id="selectFavoriteMaxId" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+		select max(id) maxId from t_weblog_favorite where user_id = #{userId}
+	</select>
+	
+	<!-- 获取收藏列表下个ID -->
+	<select id="selectFavoriteNextId" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		select a.id  
+		from t_weblog_favorite a where a.user_id = #{weblogVo.userId} 
+		and a.id &lt;= #{nextCursor} order by a.id desc limit 15,1
+	</select>
+	<!-- 评论最大ID -->
+	<select id="selectWeblogCommentMaxId" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+		select min(id) maxId from t_weblog_comment where weblog_id = #{weblogId} 
+	</select>
+	
+	<!-- 我关注的好友日志最大ID-->
+	<select id="selectAttentionWeblogMaxId" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+		<!-- 
+		select max(a.id) from t_weblog a left join t_user_attention b on a.user_id = b.friend_username
+		 and b.status = 1 where b.owner_username = #{userId} 
+		 and a.is_private = 0
+		  -->
+		 
+		select max(a.id) from (
+		select a.id,a.user_id userId,a.is_private
+		isPrivate,a.type,a.content,a.comment_count commentCount,
+		a.praise_count praiseCount,a.create_time createTime,c.name,c.nick_name
+		nickName,c.code_name codeName,
+		a.address,c.user_icon userIcon from t_weblog a left join (select * from t_user_attention n
+		where not exists (
+		select * from (
+		select a.* from t_user_attention a,t_user_relation b where a.owner_username =
+		b.owner_username
+		and a.friend_username = b.friend_username and a.owner_username = #{userId} ) c
+		where n.id = c.id ) and
+		n.owner_username = #{userId}
+		) b on a.user_id = b.friend_username
+		and b.status = 1 left join t_users c on a.user_id = c.id
+		where b.owner_username = #{userId} and a.is_private = 0
+		union all
+		select a.id,a.user_id userId,a.is_private
+		isPrivate,a.type,a.content,a.comment_count commentCount,
+		a.praise_count praiseCount,a.create_time createTime,c.name,c.nick_name
+		nickName,c.code_name codeName,
+		a.address,c.user_icon userIcon from t_weblog a left join (select a.* from t_user_attention
+		a,t_user_relation b where a.owner_username = b.owner_username
+		and a.friend_username = b.friend_username and a.owner_username = #{userId}
+		) b on a.user_id = b.friend_username
+		and b.status = 1 left join t_users c on a.user_id = c.id
+		where b.owner_username = #{userId} and a.is_private in (0,1) ) a
+		 
+	</select>
+	
+	<!-- 我关注的好友日志最大ID-->
+	<select id="selectFriendWeblogMaxIdByOwnerId" parameterType="com.starface.domain.vo.UserRelationData" resultType="java.lang.Integer">
+		<!-- 
+		select max(a.id) from t_weblog a left join t_user_attention b on a.user_id = b.friend_username
+		 and b.status = 1 where b.owner_username = #{userId} 
+		 and a.is_private = 0
+		  -->
+		 select max(id) maxid from t_weblog where user_id = #{friendUserId}
+		<!-- 好友关系 -->
+		 <if test="relation == 1">
+			and is_private in (0,1)
+		</if>
+		<!-- 关注关系 -->
+		<if test="relation == 2 || relation = 0">
+			and is_private = 0
+		</if>
+	</select>
+	
+	
+	
+	<!-- 好友日志列表 -->
+	<select id="selectWeblogListByAttention" parameterType="java.util.HashMap" resultType="com.starface.domain.vo.WeblogFriendVo">
+		<!-- 
+		select a.id,a.user_id userId,a.is_private isPrivate,a.type,a.content,a.comment_count commentCount,
+		a.praise_count praiseCount,a.create_time createTime,c.name,c.nick_name nickName,c.code_name codeName,
+		a.address,c.user_icon userIcon from t_weblog a left join t_user_attention b on a.user_id = b.friend_username 
+		and b.status = 1 left join t_users c on a.user_id = c.id  
+		 where b.owner_username = #{usersQuery.owner_username} and a.id &lt;= #{nextCursor} and a.is_private = 0
+		  order by a.id desc limit 0,15
+		   -->
+
+		select * from (
+		select a.id,a.user_id userId,a.is_private
+		isPrivate,a.type,a.content,a.comment_count commentCount,
+		a.praise_count praiseCount,a.create_time createTime,c.name,c.nick_name
+		nickName,c.code_name codeName,
+		a.address,c.user_icon userIcon from t_weblog a left join (select * from t_user_attention n
+		where not exists (
+		select * from (
+		select a.* from t_user_attention a,t_user_relation b where a.owner_username =
+		b.owner_username
+		and a.friend_username = b.friend_username and a.owner_username = #{usersQuery.owner_username} ) c
+		where n.id = c.id ) and
+		n.owner_username = #{usersQuery.owner_username}
+		) b on a.user_id = b.friend_username
+		and b.status = 1 left join t_users c on a.user_id = c.id
+		where b.owner_username = #{usersQuery.owner_username} and a.is_private = 0
+		union all
+		select a.id,a.user_id userId,a.is_private
+		isPrivate,a.type,a.content,a.comment_count commentCount,
+		a.praise_count praiseCount,a.create_time createTime,c.name,c.nick_name
+		nickName,c.code_name codeName,
+		a.address,c.user_icon userIcon from t_weblog a left join (select a.* from t_user_attention
+		a,t_user_relation b where a.owner_username = b.owner_username
+		and a.friend_username = b.friend_username and a.owner_username = #{usersQuery.owner_username}
+		) b on a.user_id = b.friend_username
+		and b.status = 1 left join t_users c on a.user_id = c.id
+		where b.owner_username = #{usersQuery.owner_username} and a.is_private in (0,1) ) a where
+		a.id &lt;= #{nextCursor}
+		order by a.id desc limit 0,15;   
+	</select>
+	
+	<!-- 根据用户ID查询日志列表 -->
+	<select id="selectWeblogAttentionNextId" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		<!-- 
+		select a.id minId from t_weblog a left join t_user_relation b on a.user_id = b.friend_username
+		 and b.status = 1 where owner_username = #{usersQuery.owner_username} and a.id &lt;= #{nextCursor} and a.is_private = 0 order by a.id desc 
+		 limit 15,1
+		 -->
+		 select a.id minId from (
+		select a.id,a.user_id userId,a.is_private
+		isPrivate,a.type,a.content,a.comment_count commentCount,
+		a.praise_count praiseCount,a.create_time createTime,c.name,c.nick_name
+		nickName,c.code_name codeName,
+		a.address,c.user_icon userIcon from t_weblog a left join (select * from t_user_attention n
+		where not exists (
+		select * from (
+		select a.* from t_user_attention a,t_user_relation b where a.owner_username =
+		b.owner_username
+		and a.friend_username = b.friend_username and a.owner_username = #{usersQuery.owner_username} ) c
+		where n.id = c.id ) and
+		n.owner_username = #{usersQuery.owner_username}
+		) b on a.user_id = b.friend_username
+		and b.status = 1 left join t_users c on a.user_id = c.id
+		where b.owner_username = #{usersQuery.owner_username} and a.is_private = 0
+		union all
+		select a.id,a.user_id userId,a.is_private
+		isPrivate,a.type,a.content,a.comment_count commentCount,
+		a.praise_count praiseCount,a.create_time createTime,c.name,c.nick_name
+		nickName,c.code_name codeName,
+		a.address,c.user_icon userIcon from t_weblog a left join (select a.* from t_user_attention
+		a,t_user_relation b where a.owner_username = b.owner_username
+		and a.friend_username = b.friend_username and a.owner_username = #{usersQuery.owner_username}
+		) b on a.user_id = b.friend_username
+		and b.status = 1 left join t_users c on a.user_id = c.id
+		where b.owner_username = #{usersQuery.owner_username} and a.is_private in (0,1) ) a
+		where a.id &lt;= #{nextCursor}  limit 15,1
+	</select>
+	
+	
+	<!-- 被我关注的好友日志最大ID-->
+	<select id="selectBeiAttentionWeblogMaxId" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+		<!-- 
+		select max(a.id) from t_weblog a left join t_user_attention b on a.user_id = b.owner_username
+		 and b.status = 1 where b.friend_username = #{userId} and a.is_private = 0
+		  -->
+		select max(id) maxId from (
+		select a.id,a.user_id userId,a.is_private
+		isPrivate,a.type,a.content,a.comment_count commentCount,
+		a.praise_count praiseCount,a.create_time createTime,c.name,c.nick_name
+		nickName,c.code_name codeName,
+		a.address,c.user_icon userIcon from t_weblog a left join (select * from t_user_attention n
+		where not exists (
+		select * from (
+		select a.* from t_user_attention a,t_user_relation b where a.owner_username =
+		b.owner_username
+		and a.friend_username = b.friend_username and a.friend_username = #{userId} ) c
+		where n.id = c.id ) and
+		n.friend_username = #{userId}
+		) b on a.user_id = b.owner_username
+		and b.status = 1 left join t_users c on a.user_id = c.id
+		where b.friend_username = #{userId} and a.is_private = 0
+		union all
+		select a.id,a.user_id userId,a.is_private
+		isPrivate,a.type,a.content,a.comment_count commentCount,
+		a.praise_count praiseCount,a.create_time createTime,c.name,c.nick_name
+		nickName,c.code_name codeName,
+		a.address,c.user_icon userIcon from t_weblog a left join (select a.* from t_user_attention
+		a,t_user_relation b where a.owner_username = b.owner_username
+		and a.friend_username = b.friend_username and a.friend_username = #{userId}
+		) b on a.user_id = b.owner_username
+		and b.status = 1 left join t_users c on a.user_id = c.id
+		where b.friend_username = #{userId} and a.is_private in (0,1)  ) a 
+	</select>
+	
+	<!-- 被好友日志列表 -->
+	<select id="selectWeblogListByBeiAttention" parameterType="java.util.HashMap" resultType="com.starface.domain.vo.WeblogFriendVo">
+		<!-- 
+		select a.id,a.user_id userId,a.is_private isPrivate,a.type,a.content,a.comment_count commentCount,a.praise_count praiseCount,
+		a.create_time createTime,c.name,c.nick_name nickName,c.code_name codeName,a.address,c.user_icon userIcon from t_weblog a left join t_user_attention b on a.user_id = b.owner_username and b.status = 1
+		 left join t_users c on a.user_id = c.id  
+		 where b.friend_username = #{usersQuery.friend_username} and a.id &lt;= #{nextCursor} and a.is_private = 0
+		  order by a.id desc limit 0,15
+		 -->  
+		select * from (
+		select a.id,a.user_id userId,a.is_private
+		isPrivate,a.type,a.content,a.comment_count commentCount,
+		a.praise_count praiseCount,a.create_time createTime,c.name,c.nick_name
+		nickName,c.code_name codeName,
+		a.address,c.user_icon userIcon from t_weblog a left join (select * from t_user_attention n
+		where not exists (
+		select * from (
+		select a.* from t_user_attention a,t_user_relation b where a.owner_username =
+		b.owner_username
+		and a.friend_username = b.friend_username and a.friend_username = #{usersQuery.friend_username} ) c
+		where n.id = c.id ) and
+		n.friend_username = #{usersQuery.friend_username}
+		) b on a.user_id = b.owner_username
+		and b.status = 1 left join t_users c on a.user_id = c.id
+		where b.friend_username = #{usersQuery.friend_username} and a.is_private = 0
+		union all
+		select a.id,a.user_id userId,a.is_private
+		isPrivate,a.type,a.content,a.comment_count commentCount,
+		a.praise_count praiseCount,a.create_time createTime,c.name,c.nick_name
+		nickName,c.code_name codeName,
+		a.address,c.user_icon userIcon from t_weblog a left join (select a.* from t_user_attention
+		a,t_user_relation b where a.owner_username = b.owner_username
+		and a.friend_username = b.friend_username and a.friend_username = #{usersQuery.friend_username}
+		) b on a.user_id = b.owner_username
+		and b.status = 1 left join t_users c on a.user_id = c.id
+		where b.friend_username = #{usersQuery.friend_username} and a.is_private in (0,1)  ) a where
+		a.id &lt;= #{nextCursor}
+		order by a.id desc limit 0,15;
+		  
+	</select>
+	
+	<!-- 被根据用户ID查询日志列表 -->
+	<select id="selectWeblogBeiAttentionNextId" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		<!-- 
+		select a.id minId from t_weblog a left join t_user_relation b on a.user_id = b.owner_username
+		 and b.status = 1 where friend_username = #{usersQuery.friend_username} and a.is_private = 0 and a.id &lt;= #{nextCursor} order by a.id desc 
+		 limit 15,1
+		  -->
+		select a.id minId from (
+		select a.id,a.user_id userId,a.is_private
+		isPrivate,a.type,a.content,a.comment_count commentCount,
+		a.praise_count praiseCount,a.create_time createTime,c.name,c.nick_name
+		nickName,c.code_name codeName,
+		a.address,c.user_icon userIcon from t_weblog a left join (select * from t_user_attention n
+		where not exists (
+		select * from (
+		select a.* from t_user_attention a,t_user_relation b where a.owner_username =
+		b.owner_username
+		and a.friend_username = b.friend_username and a.friend_username = #{usersQuery.friend_username} ) c
+		where n.id = c.id ) and
+		n.friend_username = #{usersQuery.friend_username}
+		) b on a.user_id = b.owner_username
+		and b.status = 1 left join t_users c on a.user_id = c.id
+		where b.friend_username = #{usersQuery.friend_username} and a.is_private = 0
+		union all
+		select a.id,a.user_id userId,a.is_private
+		isPrivate,a.type,a.content,a.comment_count commentCount,
+		a.praise_count praiseCount,a.create_time createTime,c.name,c.nick_name
+		nickName,c.code_name codeName,
+		a.address,c.user_icon userIcon from t_weblog a left join (select a.* from t_user_attention
+		a,t_user_relation b where a.owner_username = b.owner_username
+		and a.friend_username = b.friend_username and a.friend_username = #{usersQuery.friend_username}
+		) b on a.user_id = b.owner_username
+		and b.status = 1 left join t_users c on a.user_id = c.id
+		where b.friend_username = #{usersQuery.friend_username} and a.is_private in (0,1)  ) a
+		where a.id &lt;= #{nextCursor} order by a.id desc  limit 15,1
+		 
+	</select>
+	
+	<select id="selectWeblogPraiseListByWeblogId" parameterType="com.starface.domain.Weblog" resultType="com.starface.domain.vo.PraiseListVo">
+		select type,count(id) num from t_weblog_praise where weblog_id = #{id} group by type
+	</select>
+	
+	<!-- 某人某月日志最大ID-->
+	<select id="selectMonthWeblogMaxId" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		select max(a.id) maxId from t_weblog a where a.user_id = #{userId} and 
+		create_time between #{beginTime} and #{endTime}
+		<if test="isFriend != null">
+			and is_private in (0,1)
+		</if>
+		<if test="isFriend == null">
+			and is_private = 0
+		</if>
+	</select>
+	<!-- 获取某人某月日志列表 -->
+	<select id="selectWeblogListByMonth" parameterType="java.util.HashMap" resultType="com.starface.domain.vo.WeblogFriendVo">
+		 
+		 select a.id,a.user_id userId,a.is_private isPrivate,a.type,a.content,a.comment_count commentCount,a.praise_count praiseCount,
+		a.create_time createTime,a.address,b.user_icon userIcon,b.nick_name nickName from t_weblog a left join t_users b on a.user_id = b.id 
+		where a.user_id = #{userId} and a.id &lt;= #{nextCursor} and a.create_time between #{beginTime} and #{endTime}
+		<if test="isFriend != null">
+			and is_private in (0,1)
+		 </if>
+		 <if test="isFriend == null">
+			and is_private = 0
+		 </if>
+		  order by a.id desc limit 0,15
+		 
+	</select>
+	<!-- 获取某人某月下一个光标 -->
+	<select id="selectWeblogMonthNextId" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		 
+		 select id minId from t_weblog where user_id = #{weblogVo.userId} and id &lt;= #{nextCursor} 
+		  and create_time between #{beginTime} and #{endTime}
+			order by id desc limit 15,1
+	</select>
+	
+	<!-- 获取某人某月日志列表 -->
+	<select id="getTheMonthDays" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		 select day from (
+		 select FROM_UNIXTIME(a.create_time/1000,'%Y-%m-%d') day from t_weblog a left join t_users b on a.user_id = b.id 
+		where a.user_id = #{userId} and a.id &lt;= #{nextCursor} and a.create_time between #{beginTime} and #{endTime}
+		<if test="isFriend != null">
+			and is_private in (0,1)
+		 </if>
+		 <if test="isFriend == null">
+			and is_private = 0
+		 </if>
+		 ) a group by day
+		 
+	</select>
+	
+	<select id="sysWeblogList" parameterType="com.starface.domain.vo.WeblogManagerVo" resultType="com.starface.domain.vo.WeblogManagerVo">
+		select a.id,a.user_id userId,a.is_private isPrivate,a.type,content,a.comment_count commentCount,
+		a.praise_count praiseCount,a.create_time createTime,a.address,b.user_name name,
+		date_format(a.create_time,'%Y-%m-%d %H:%i:%s') createTimeView  from t_weblog a left join t_users b 
+		on a.user_id = b.id order by a.id desc  
+		<if test="start != null">
+   	  	limit ${start * limit} ,#{limit}
+   		</if>
+	</select>
+	
+	<select id="sysWeblogListCount" parameterType="com.starface.domain.vo.WeblogManagerVo" resultType="java.lang.Integer">
+		select count(1) cnt from t_weblog a left join t_users b on a.user_id = b.id
+	</select>
+	<!-- 删除日志 -->
+	<update id="deleteWeblog" parameterType="com.starface.domain.vo.WeblogVo">
+	update t_weblog set is_delete = 1 where id = #{id} 
+	</update>
+	
+</mapper>

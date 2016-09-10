@@ -1,0 +1,9 @@
+/RestAPIConfig.properties
+/com/
+/ehcache.xml
+/freemarker.properties
+/jdbc.properties
+/log4j.properties
+/spring-config.xml
+/spring-mvc.xml
+/sqlMapConfig.xml

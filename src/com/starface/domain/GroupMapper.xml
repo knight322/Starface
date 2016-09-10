@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.starface.domain.GroupMapper" >
+
+	<!-- 群组类型列表 -->
+	<select id="selectGroupTypeList" parameterType="com.starface.domain.GroupType" resultType="com.starface.domain.GroupType">
+		select id ,parent_id parentId,level,label,is_stop isStop from t_group_type 
+		<where>
+			<if test="parentId != null">
+			parent_id = #{parentId}
+			</if>
+			<if test="level != null">
+			level = #{level}
+			</if>
+		</where>
+	</select>
+	<!-- 根据groupId查询群组 -->
+	<select id="getGroupByGroupId" parameterType="com.starface.domain.Group" resultType="com.starface.domain.Group">
+		select id,group_name groupName,group_type groupType ,group_user_count groupUserCount,
+		group_create_user groupCreateUser,group_create_time groupCreateTime,
+		group_icon groupIcon,group_desc groupDesc,province_id provinceId,province_name provinceName,
+		city_id cityId,city_name cityName,area_id areaId,area_name areaName,longitude,latitude,groupId,group_style groupStyle
+		 from t_group where groupId = #{groupId}
+	</select>
+	<!-- 创建组 -->
+ 	<insert id="insertGroup" parameterType="com.starface.domain.Group"  useGeneratedKeys="true" keyProperty="id">
+		insert into t_group(group_name,group_type,group_user_count,group_create_user,group_create_time,groupId,group_style)
+		values
+		(#{groupName},#{groupType},#{groupUserCount},#{groupCreateUser},#{groupCreateTime},#{groupId},${groupStyle})
+	</insert>
+	
+	<!-- 更新群组用户数量 -->
+	<update id="updateGroupUserCount" parameterType="com.starface.domain.Group">
+		update t_group g set g.group_user_count = (select count(1) from t_group_user a where a.group_id = g.id)
+		where g.id = #{id}
+	</update>
+	
+	<!-- 更新群组 -->
+	<update id="updateGroup" parameterType="com.starface.domain.Group">
+		update t_group g 
+		<set>
+			<if test="groupType != null">
+				g.group_type = #{groupType},
+			</if>
+			<if test="groupUserCount">
+				g.group_user_count = #{groupUserCount},
+			</if>
+			<if test="groupName != null">
+				g.group_name = #{groupName},
+			</if>
+			<if test="groupIcon">
+				g.group_icon = #{groupIcon},
+			</if>
+			<if test="groupDesc">
+				g.group_desc = #{groupDesc},
+			</if>
+			<if test="provinceId ">
+				g.province_id = #{provinceId},
+			</if>
+			<if test="provinceName ">
+				g.province_name = #{provinceName},
+			</if>
+			<if test="cityId ">
+				g.city_id = #{cityId},
+			</if>
+			<if test="cityName ">
+				g.city_name = #{cityName},
+			</if>
+			<if test="areaId ">
+				g.area_id = #{areaId},
+			</if>
+			<if test="areaName ">
+				g.area_name = #{areaName},
+			</if>
+			<if test="longitude ">
+				g.longitude = #{longitude},
+			</if>
+			<if test="latitude ">
+				g.latitude = #{latitude},
+			</if>
+			<if test="groupId ">
+				g.groupId = #{groupId},
+			</if>
+			<if test="groupId ">
+				g.group_style = #{groupStyle},
+			</if>
+		</set>
+		where g.id = #{id}
+	</update>
+	
+	<!-- 删除群组-->
+	<delete id="deleteGroupById" parameterType="com.starface.domain.Group">
+		delete from t_group where id = #{id}
+	</delete>
+	
+	
+	<!-- 群组添加用户 -->
+	<insert id="insertGroupUser" parameterType="com.starface.domain.vo.GroupUserVo">
+		insert into t_group_user(group_id,user_id,is_manage,status,alias,create_time)
+		values
+		<foreach collection="userIds" item="user" index="i" separator=",">
+		(#{groupId},#{user},#{isManage},#{status},#{alias},#{createTime})
+		</foreach>
+	</insert>
+	
+	<!-- 群组添加用户 -->
+	<insert id="insertGroupOneUser" parameterType="com.starface.domain.vo.GroupUserVo">
+		insert into t_group_user(group_id,user_id,is_manage,status,alias,create_time)
+		values (#{groupId},#{userId},#{isManage},#{status},#{alias},#{createTime})
+		
+	</insert>
+	
+	<!-- 删除群组中的用户 根据ID -->
+	<delete id="deleteGroupUserById" parameterType="com.starface.domain.GroupUser">
+		delete from t_group_user where id = #{id}
+	</delete>
+	
+	<!-- 删除群组中的用户 根据群组ID -->
+	<delete id="deleteGroupUserByGroupId" parameterType="com.starface.domain.GroupUser">
+		delete from t_group_user where group_id = #{groupId}
+	</delete>
+	<!-- 根据ID获取群组信息 -->
+	<select id="getGroupById"  parameterType="com.starface.domain.Group" resultType="com.starface.domain.Group">
+		select id,group_name groupName,group_type groupType ,group_user_count groupUserCount,
+		group_create_user groupCreateUser,group_create_time groupCreateTime,
+		group_icon groupIcon,group_desc groupDesc,province_id provinceId,province_name provinceName,
+		city_id cityId,city_name cityName,area_id areaId,area_name areaName,longitude,latitude,groupId,group_style groupStyle
+		 from t_group where id = #{id}
+	</select>
+	
+	
+	<!-- 群组添加标签 -->
+	<insert id="groupAddLabel" parameterType="com.starface.domain.GroupLabel" useGeneratedKeys="true" keyProperty="id">
+		insert into t_group_label(group_id,label_id,label_name,create_time) 
+		values(#{groupId},#{labelId},#{labelName},#{createTime})
+	</insert>
+	
+	<!-- 删除群组标签 -->
+	<delete id="deleteGroupLabel" parameterType="com.starface.domain.GroupLabel">
+		delete from t_group_label where id = #{id}
+	</delete>
+	<!-- 删除群组标签,根据群组ID -->
+	<delete id="deleteGroupLabelByGroupId" parameterType="com.starface.domain.GroupLabel">
+		delete from t_group_label where group_id = #{groupId}
+	</delete>
+	
+	<!-- 根据用户ID检查是否在群组中 -->
+	<select id="selectGroupUserInUserId" parameterType="com.starface.domain.vo.GroupUserVo" resultType="com.starface.domain.GroupUser">
+		select id,group_id groupId,user_id userId,is_manage isManage,status,alias,create_time createTime
+ 		from t_group_user where group_id = #{groupId} and user_id in (
+ 		<foreach collection="userIds" item="user" index="i" separator=",">
+			#{user}
+		</foreach>
+ 		);
+	</select>
+	<!-- 删除群组中的用户 -->
+	<delete id="deleteGroupUser" parameterType="com.starface.domain.vo.GroupUserVo">
+		delete from t_group_user where group_id = #{groupId} and 
+		user_id in (
+		<foreach collection="userIds" item="user" index="i" separator=",">
+			#{user}
+		</foreach>
+		)
+	</delete>
+	
+	<!-- 删除群组中的用户 根据群组ID和用户ID -->
+	<delete id="deleteGroupByGroupIdAndUserId" parameterType="com.starface.domain.vo.GroupUserVo">
+		delete from t_group_user where group_id = #{groupId} and 
+		user_id = #{userId}
+	</delete>
+	
+	<!-- 获取自己的群组列表 -->
+	<select id="selectGroupListByUserId" resultType="com.starface.domain.Group" parameterType="com.starface.domain.vo.GroupUserVo">
+		
+		select a.*,b.label groupTypeName from (
+		select a.id,a.group_name groupName,a.group_type groupType ,a.group_user_count groupUserCount,
+		a.group_create_user groupCreateUser,a.group_create_time groupCreateTime,
+		a.group_icon groupIcon,a.group_desc groupDesc,a.province_id provinceId,a.province_name provinceName,
+		a.city_id cityId,a.city_name cityName,a.area_id areaId,a.area_name areaName,a.longitude,a.latitude,a.groupId,a.group_style groupStyle
+		from t_group a,t_group_user b 
+		where a.id = b.group_id and b.user_id = #{userId} ) a left join t_group_type b on a.groupType = b.id 
+	</select>
+	
+	<select id="selectGroupUserList" resultType="com.starface.domain.vo.GroupUserVo" parameterType="com.starface.domain.vo.GroupUserVo">
+		select a.id,a.group_id groupId,a.user_id userId,a.is_manage isManage,a.status,a.alias,a.create_time createTime,
+		b.user_name userName,b.nick_name nickName,b.code_name codeName,b.name,b.age,b.user_icon userIcon,b.gender
+		from t_group_user a left join t_users b on a.user_id = b.id where a.group_id = #{groupId}
+		<if test="userIds != null and userIds.size() > 0">
+			and 
+			a.user_id in (
+			<foreach collection="userIds" item="user" index="i" separator=",">
+				#{user}
+			</foreach>
+			)
+		</if>
+	</select>
+	
+	<select id="searchGroup" resultType="com.starface.domain.vo.GroupVo" parameterType="com.starface.domain.vo.GroupVo">
+		select id,group_name groupName,group_type groupType ,group_user_count groupUserCount,
+		group_create_user groupCreateUser,group_create_time groupCreateTime,
+		group_icon groupIcon,group_desc groupDesc,province_id provinceId,province_name provinceName,
+		city_id cityId,city_name cityName,area_id areaId,area_name areaName,longitude,latitude,groupId,group_style groupStyle
+		from t_group where 1 = 1
+		<if test="groupName != null">
+		 and group_name  like CONCAT('%',#{groupName,jdbcType=VARCHAR},'%' )
+		</if>
+		<if test="groupType != null">
+		 and group_type = #{groupType,jdbcType=INTEGER}
+		</if>
+		<if test="groupName != null">
+		 order by case when group_name like CONCAT(#{groupName,jdbcType=VARCHAR},'%' ) then 1 else 0 end desc
+		</if>
+		limit #{currentRecodNum},#{pageSize}
+	</select>
+	
+	<select id="searchGroupCount" resultType="java.lang.Integer" parameterType="com.starface.domain.vo.GroupVo">
+		select count(1) cnt
+		from t_group where 1 = 1
+		<if test="groupName != null">
+		 and group_name  like CONCAT('%',#{groupName,jdbcType=VARCHAR},'%' )
+		</if>
+		<if test="groupType != null">
+		 and group_type = #{groupType,jdbcType=INTEGER}
+		</if>
+	</select>
+	
+	<select id="selectGroupUserCount"  parameterType="com.starface.domain.vo.GroupUserVo" resultType="java.lang.Integer">
+		select count(1) cnt from t_group_user where group_id = #{groupId} and user_id = #{userId}
+	</select>
+	
+	<!-- 更新经纬度 -->
+  <update id="uploadLocal" parameterType="com.starface.domain.vo.GroupUserVo">
+  update t_group set longitude = #{longitude} , latitude = #{latitude} , last_update_time = current_timestamp() 
+  where id = #{id}
+  </update>
+	
+</mapper>

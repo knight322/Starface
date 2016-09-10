@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.starface.domain.SystemCityMapper" >
+  <resultMap id="BaseResultMap" type="com.starface.domain.SystemCity" >
+    <id column="class_id" property="classId" jdbcType="SMALLINT" />
+    <result column="class_parent_id" property="classParentId" jdbcType="SMALLINT" />
+    <result column="class_name" property="className" jdbcType="VARCHAR" />
+    <result column="class_type" property="classType" jdbcType="TINYINT" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    class_id, class_parent_id, class_name, class_type
+  </sql>
+  <select id="selectByQueryVo" resultMap="BaseResultMap" parameterType="QueryVo" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_system_city
+    where class_type = #{parameters.classType,jdbcType=INTEGER} 
+    <if test="parameters.classParentId != null ">
+    and class_parent_id = #{parameters.classParentId,jdbcType=INTEGER}
+    </if>
+  </select>
+  <select id="getAllArea" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_system_city
+    
+  </select>
+  
+  <select id="selectByIdForClassName" resultType="java.lang.String" parameterType="Integer">
+    select 
+    class_name className
+    from t_system_city
+    where class_id = #{id,jdbcType=INTEGER}
+  </select>
+  
+  <select id="illegalList" resultType="com.starface.domain.Illegal">
+    select * from t_illegal_list
+  </select>
+  
+  <insert id="saveInform" parameterType="com.starface.domain.Illegal">
+  insert into t_inform(illegal_id,obj_id,user_id,type,remark)
+  values(#{illegalId},#{objId},#{userId},#{type},#{remark})
+  </insert>
+  
+  <select id="informManageList" resultType="com.starface.domain.vo.InformVo" parameterType="com.starface.domain.vo.InformVo">
+    select a.id,c.user_name userName,case when type = 1 then '举报日志' 
+		when type = 2 then '举报聊天' 
+		when type = 3 then '举报用户' end informType,
+		a.obj_id objId,b.name illegalName,a.remark,
+		a.create_time createTime
+		 from t_inform a left join t_illegal_list b on a.illegal_id = b.id left join t_users c 
+		on a.user_id = c.id order by id desc
+		<if test="start != null">
+   	  	limit ${start * limit} ,#{limit}
+   		</if>
+  </select>
+  
+  <select id="informManageListCount" resultType="java.lang.Integer" parameterType="com.starface.domain.vo.InformVo">
+    select count(1) cnt
+		 from t_inform a left join t_illegal_list b on a.illegal_id = b.id left join t_users c 
+		on a.user_id = c.id 
+  </select>
+  
+</mapper>

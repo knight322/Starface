@@ -1,0 +1,830 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.starface.domain.UsersMapper" >
+
+  <resultMap id="BaseResultMap" type="com.starface.domain.Users" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="user_name" property="userName" jdbcType="VARCHAR" />
+    <result column="pwd" property="pwd" jdbcType="VARCHAR" />
+    <result column="nick_name" property="nickName" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="is_stop" property="isStop" jdbcType="INTEGER" />
+    <result column="code_name" property="codeName" jdbcType="VARCHAR" />
+    <result column="email_certified" property="emailCertified" jdbcType="INTEGER" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="age" property="age" jdbcType="INTEGER" />
+    <result column="birthday" property="birthday" jdbcType="DATE" />
+    <result column="sign" property="sign" jdbcType="VARCHAR" />
+    <result column="company" property="company" jdbcType="VARCHAR" />
+    <result column="school" property="school" jdbcType="VARCHAR" />
+    <result column="province_id" property="provinceId" jdbcType="INTEGER" />
+    <result column="city_id" property="cityId" jdbcType="INTEGER" />
+    <result column="area_id" property="areaId" jdbcType="INTEGER" />
+    <result column="hometown" property="hometown" jdbcType="VARCHAR" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="user_icon" property="userIcon" jdbcType="VARCHAR" />
+    <result column="gender" property="gender" jdbcType="INTEGER" />
+    <result column="pet" property="pet" jdbcType="VARCHAR" />
+    <result column="books" property="books" jdbcType="VARCHAR" />
+    <result column="movie" property="movie" jdbcType="VARCHAR" />
+    <result column="sport" property="sport" jdbcType="VARCHAR" />
+    <result column="music" property="music" jdbcType="VARCHAR" />
+    <result column="mobile" property="mobile" jdbcType="VARCHAR" />
+  </resultMap>
+  
+  <sql id="Base_Where_Clause">
+		<where>
+			<trim prefixOverrides="and">
+				<if test="parameters.id != null"> and id = #{parameters.id}</if>
+				<if test="parameters.userName != null"> and user_name = #{parameters.userName}</if>
+				<if test="parameters.pwd != null">and pwd = #{parameters.pwd}</if>
+				<if test="parameters.nickName != null">and nick_name = #{parameters.nickName}</if>
+				<if test="parameters.isStop != null">and is_stop = #{parameters.isStop}</if>
+				<if test="parameters.codeName != null">and code_name = #{parameters.codeName}</if>
+				<if test="parameters.emailCertified != null">and email_certified = #{parameters.emailCertified}</if>
+				<if test="parameters.gender != null">and gender = #{parameters.gender}</if>
+				<if test="parameters.province_id != null">and province_id = #{parameters.provinceId}</if>
+				<if test="parameters.city_id != null">and city_id  = #{parameters.cityId}</if>
+				<if test="parameters.area_id != null">and area_id = #{parameters.areaId}</if>
+			</trim>
+		</where>
+		<if test="orderBy != null">order by ${orderBy}</if>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+  </sql>
+  
+  <sql id="Base_Column_List" >
+    id, user_name, pwd, nick_name, create_time, is_stop, code_name, email_certified,gender,province_id,city_id,area_id,mobile
+  </sql>
+  <sql id="Base_Column_List_PO" >
+    id,user_name as userName,nick_name nickName,code_name codeName,email_certified emailCertified,
+		sign aav,remark,user_icon userIcon,gender,province_name as provinceName,city_name cityName,
+		area_name areaName,sign,age,date_format(create_time,'%Y-%m-%d %H:%i:%s') createTime,school,
+		hometown_province_name hometownProvinceName,hometown_city_name hometownCityName,hometown_area_name hometownAreaName,
+		hometown_province_id hometownProvinceId,hometown_city_id hometownCityId,hometown_area_id hometownAreaId,
+		province_id provinceId,city_id cityId,area_id areaId,pet,books,movie,sport,music,mobile,longitude,latitude
+  </sql>
+  
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_users
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  
+  <select id="selectByUsers" parameterType="QueryVo" resultMap="BaseResultMap" >
+    select 
+      <include refid="Base_Column_List" />
+     from t_users
+    <include refid="Base_Where_Clause" />
+  </select>
+  
+  
+  <select id="login" parameterType="QueryVo" resultMap="BaseResultMap" >
+    select 
+      <include refid="Base_Column_List" />,is_lock isLock
+     from t_users
+     where (user_name = #{userName} or mobile = #{mobile}) and pwd = #{pwd} limit 1
+  </select>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from t_users
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.starface.domain.Users" >
+    insert into t_users (user_name, pwd, 
+      nick_name, create_time, is_stop, 
+      code_name, email_certified)
+    values (#{userName,jdbcType=VARCHAR}, #{pwd,jdbcType=VARCHAR}, 
+      #{nickName,jdbcType=VARCHAR}, current_timestamp(), #{isStop,jdbcType=INTEGER}, 
+      #{codeName,jdbcType=VARCHAR}, #{emailCertified,jdbcType=INTEGER}) 
+  </insert>
+  <insert id="insertSelective" parameterType="com.starface.domain.Users" useGeneratedKeys="true" keyProperty="id">
+    insert into t_users
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      create_time,
+      <if test="userName != null" >
+        user_name,
+      </if>
+      <if test="mobile != null" >
+        mobile,
+      </if>
+      <if test="pwd != null" >
+        pwd,
+      </if>
+      <if test="nickName != null" >
+        nick_name,
+      </if>
+      <if test="isStop != null" >
+        is_stop,
+      </if>
+      <if test="codeName != null" >
+        code_name,
+      </if>
+      <if test="emailCertified != null" >
+        email_certified,
+      </if>
+      <if test="openId != null" >
+        open_id,
+      </if>
+      <if test="openType != null" >
+        open_type,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      current_timestamp(),
+      <if test="userName != null" >
+        #{userName,jdbcType=VARCHAR},
+      </if>
+      <if test="mobile != null" >
+        #{mobile,jdbcType=VARCHAR},
+      </if>
+      <if test="pwd != null" >
+        #{pwd,jdbcType=VARCHAR},
+      </if>
+      <if test="nickName != null" >
+        #{nickName,jdbcType=VARCHAR},
+      </if>
+        
+      <if test="isStop != null" >
+        #{isStop,jdbcType=INTEGER},
+      </if>
+      <if test="codeName != null" >
+        #{codeName,jdbcType=VARCHAR},
+      </if>
+      <if test="emailCertified != null" >
+        #{emailCertified,jdbcType=INTEGER},
+      </if>
+      <if test="openId != null" >
+        #{openId,jdbcType=VARCHAR},
+      </if>
+      <if test="openType != null" >
+        #{openType,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <select id="count" parameterType="QueryVo" resultType="java.lang.Integer" >
+    select count(id) from t_users
+    <include refid="Base_Where_Clause" />
+  </select>
+  
+  <select id="userIsExixts" parameterType="QueryVo" resultType="java.lang.Integer" >
+	select count(id) from t_users
+	where user_name = #{parameters.userName,jdbcType=VARCHAR} or mobile = #{parameters.mobile,jdbcType=VARCHAR}
+	<!-- 
+	<if test="parameters.userName != null">
+		user_name = #{parameters.userName,jdbcType=VARCHAR}
+	</if>
+	<if test="parameters.mobile != null">
+		or mobile = #{parameters.mobile,jdbcType=VARCHAR}
+	</if>  -->
+  </select>
+  
+  <select id="getUserByOpenTypeAndOpenId" parameterType="QueryVo" resultType="com.starface.domain.Users" >
+	select * from t_users
+	where open_type = #{parameters.openType,jdbcType=INTEGER} and open_id = #{parameters.openId,jdbcType=VARCHAR}
+  </select>
+  <update id="updateByPrimaryKeySelective" parameterType="QueryVo" >
+    update t_users
+    <set >
+      <if test="parameters.userName != null" >
+        user_name = #{parameters.userName,jdbcType=VARCHAR},
+      </if>
+      <if test="parameters.mobile != null" >
+        mobile = #{parameters.mobile,jdbcType=VARCHAR},
+      </if>
+      <if test="parameters.pwd != null" >
+        pwd = #{parameters.pwd,jdbcType=VARCHAR},
+      </if>
+      <if test="parameters.nickName != null" >
+        nick_name = #{parameters.nickName,jdbcType=VARCHAR},
+      </if>
+      <if test="parameters.isStop != null" >
+        is_stop = #{parameters.isStop,jdbcType=INTEGER},
+      </if>
+      <if test="parameters.codeName != null" >
+        code_name = #{parameters.codeName,jdbcType=VARCHAR},
+      </if>
+      <if test="parameters.emailCertified != null" >
+        email_certified = #{parameters.emailCertified,jdbcType=INTEGER},
+      </if>
+      <if test="parameters.icon != null" >
+        icon = #{parameters.icon,jdbcType=INTEGER},
+      </if>
+      <if test="parameters.name != null" >
+        name = #{parameters.name,jdbcType=VARCHAR},
+      </if>
+      <if test="parameters.age != null" >
+        age = #{parameters.age,jdbcType=INTEGER},
+      </if>
+      <if test="parameters.birthday != null" >
+        birthday = #{parameters.birthday,jdbcType=DATE},
+      </if>
+      <if test="parameters.sign != null" >
+        sign = #{parameters.sign,jdbcType=VARCHAR},
+      </if>
+      <if test="parameters.company != null" >
+        company = #{parameters.company,jdbcType=VARCHAR},
+      </if>
+      <if test="parameters.school != null" >
+        school = #{parameters.school,jdbcType=VARCHAR},
+      </if>
+      <if test="parameters.cityId != null" >
+        city_id = #{parameters.cityId,jdbcType=INTEGER},
+      </if>
+      <if test="parameters.hometown != null" >
+        hometown = #{parameters.hometown,jdbcType=VARCHAR},
+      </if>
+      <if test="parameters.remark != null" >
+        remark = #{parameters.remark,jdbcType=VARCHAR},
+      </if>
+      <if test="parameters.userIcon != null" >
+        user_icon = #{parameters.userIcon,jdbcType=VARCHAR},
+      </if>
+      <if test="parameters.gender != null" >
+        gender = #{parameters.gender,jdbcType=INTEGER},
+      </if>
+      <if test="parameters.provinceId != null" >
+        province_id = #{parameters.provinceId,jdbcType=INTEGER},
+      </if>
+      <if test="parameters.areaId != null" >
+        area_id = #{parameters.areaId,jdbcType=INTEGER},
+      </if>
+      <if test="parameters.provinceName != null" >
+        province_name = #{parameters.provinceName,jdbcType=VARCHAR},
+      </if>
+      <if test="parameters.cityName != null" >
+        city_name = #{parameters.cityName,jdbcType=VARCHAR},
+      </if>
+      <if test="parameters.areaName != null" >
+        area_name = #{parameters.areaName,jdbcType=VARCHAR},
+      </if>
+      
+      <if test="parameters.hometownProvinceId != null" >
+        hometown_province_id = #{parameters.hometownProvinceId,jdbcType=INTEGER},
+      </if>
+      <if test="parameters.hometownCityId != null" >
+        hometown_city_id = #{parameters.hometownCityId,jdbcType=INTEGER},
+      </if>
+      <if test="parameters.hometownAreaId != null" >
+        hometown_area_id = #{parameters.hometownAreaId,jdbcType=INTEGER},
+      </if>
+      <if test="parameters.hometownProvinceName != null" >
+         hometown_province_name = #{parameters.hometownProvinceName,jdbcType=VARCHAR},
+      </if>
+      <if test="parameters.hometownCityName != null" >
+        hometown_city_name = #{parameters.hometownCityName,jdbcType=VARCHAR},
+      </if>
+      <if test="parameters.hometownAreaName != null" >
+        hometown_area_name = #{parameters.hometownAreaName,jdbcType=VARCHAR},
+      </if>
+      
+      <if test="parameters.pet != null" >
+        pet = #{parameters.pet,jdbcType=VARCHAR},
+      </if>
+      <if test="parameters.books != null" >
+        books = #{parameters.books,jdbcType=VARCHAR},
+      </if>
+      <if test="parameters.movie != null" >
+        movie = #{parameters.movie,jdbcType=VARCHAR},
+      </if>
+      <if test="parameters.sport != null" >
+        sport = #{parameters.sport,jdbcType=VARCHAR},
+      </if>
+      <if test="parameters.music != null" >
+        music = #{parameters.music,jdbcType=VARCHAR},
+      </if>
+      
+    </set>
+    where id = #{parameters.id,jdbcType=INTEGER}
+  </update>
+  
+  
+  <update id="modifyPwdByEmail" parameterType="QueryVo" >
+    update t_users
+    <set>
+      <if test="parameters.pwd != null" >
+        pwd = #{parameters.pwd,jdbcType=VARCHAR}
+      </if>
+    </set>
+    where user_name = #{parameters.userName,jdbcType=VARCHAR}
+  </update>
+  
+  <update id="modifyPwdByMobile" parameterType="QueryVo" >
+    update t_users
+    <set>
+      <if test="parameters.pwd != null" >
+        pwd = #{parameters.pwd,jdbcType=VARCHAR}
+      </if>
+    </set>
+    where mobile = #{parameters.mobile,jdbcType=VARCHAR}
+  </update>
+  
+  <update id="modifyPwdById" parameterType="QueryVo" >
+    update t_users
+    <set>
+      <if test="parameters.pwd != null" >
+        pwd = #{parameters.pwd,jdbcType=VARCHAR}
+      </if>
+    </set>
+    where id = #{parameters.id,jdbcType=INTEGER}
+  </update>
+  
+  <update id="updateByPrimaryKey" parameterType="com.starface.domain.Users" >
+    update t_users
+    set user_name = #{userName,jdbcType=VARCHAR},
+      pwd = #{pwd,jdbcType=VARCHAR},
+      nick_name = #{nickName,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      is_stop = #{isStop,jdbcType=INTEGER},
+      code_name = #{codeName,jdbcType=VARCHAR},
+      email_certified = #{emailCertified,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <!-- 搜索好友 -->
+  <select id="searchUser" parameterType="QueryVo" resultType="com.starface.domain.po.UserPo" >
+    select 
+     <include refid="Base_Column_List_PO" />
+     from t_users
+    <where>
+    	<if test="parameters.searchName != null">
+    	and (user_name like CONCAT('%',#{parameters.searchName,jdbcType=VARCHAR},'%' ) or
+    	 code_name like CONCAT('%',#{parameters.searchName,jdbcType=VARCHAR},'%' ) or
+    	 mobile like CONCAT('%',#{parameters.searchName,jdbcType=VARCHAR},'%' ) or
+    	 nick_name like CONCAT('%',#{parameters.searchName,jdbcType=VARCHAR},'%' ))
+    	</if>
+    	<if test="parameters.gender != null and parameters.gender != 0">
+    	and  gender = #{parameters.gender,jdbcType=INTEGER}
+    	</if>
+    	<if test="parameters.endAge != 0 and null != parameters.endAge">
+    	<![CDATA[    
+    	and  age >= #{parameters.startAge,jdbcType=INTEGER} and age <= #{parameters.endAge,jdbcType=INTEGER} 
+    	]]>
+    	</if>
+    	<if test="parameters.provinceId != null">
+    	and  province_id = #{parameters.provinceId,jdbcType=INTEGER}
+    	</if>
+    	<if test="parameters.cityId != null">
+    	and  city_id = #{parameters.cityId,jdbcType=INTEGER}
+    	</if>
+    	<if test="parameters.areaId != null">
+    	and  area_id = #{parameters.areaId,jdbcType=INTEGER}
+    	</if>
+    	<if test="parameters.id != null">
+    	and  id = #{parameters.id,jdbcType=INTEGER}
+    	</if>
+    	<if test="parameters.hometownProvinceId != null">
+    	and  hometown_province_id = #{parameters.hometownProvinceId,jdbcType=INTEGER}
+    	</if>
+    	<if test="parameters.hometownCityId != null">
+    	and  hometown_city_id = #{parameters.hometownCityId,jdbcType=INTEGER}
+    	</if>
+    	<if test="parameters.hometownAreaId != null">
+    	and  hometown_area_id = #{parameters.hometownAreaId,jdbcType=INTEGER}
+    	</if>
+    	and is_stop = 0 
+    	limit #{offset,jdbcType=INTEGER},#{limit,jdbcType=INTEGER}
+    </where>
+  </select>
+  
+  <select id="searchUserCount" parameterType="QueryVo" resultType="java.lang.Integer" >
+    select 
+   count(1) 
+     from t_users 
+    <where>
+    	<if test="parameters.searchName != null">
+    	and (user_name like CONCAT('%',#{parameters.searchName,jdbcType=VARCHAR},'%' ) or
+    	 code_name like CONCAT('%',#{parameters.searchName,jdbcType=VARCHAR},'%' ) or
+    	 nick_name like CONCAT('%',#{parameters.searchName,jdbcType=VARCHAR},'%' ))
+    	</if>
+    	<if test="parameters.gender != null and parameters.gender != 0">
+    	and  gender = #{parameters.gender,jdbcType=INTEGER}
+    	</if>
+    	<if test="parameters.endAge != 0 and null != parameters.endAge">
+    	<![CDATA[    
+    	and  age >= #{parameters.startAge,jdbcType=INTEGER} and age <= #{parameters.endAge,jdbcType=INTEGER} 
+    	]]>
+    	</if>
+    	<if test="parameters.provinceId != null">
+    	and  province_id = #{parameters.provinceId,jdbcType=INTEGER}
+    	</if>
+    	<if test="parameters.cityId != null">
+    	and  city_id = #{parameters.cityId,jdbcType=INTEGER}
+    	</if>
+    	<if test="parameters.areaId != null">
+    	and  area_id = #{parameters.areaId,jdbcType=INTEGER}
+    	</if>
+    	<if test="parameters.id != null">
+    	and  id = #{parameters.id,jdbcType=INTEGER}
+    	</if>
+    	<if test="parameters.hometownProvinceId != null">
+    	and  hometown_province_id = #{parameters.hometownProvinceId,jdbcType=INTEGER}
+    	</if>
+    	<if test="parameters.hometownCityId != null">
+    	and  hometown_city_id = #{parameters.hometownCityId,jdbcType=INTEGER}
+    	</if>
+    	<if test="parameters.hometownAreaId != null">
+    	and  hometown_area_id = #{parameters.hometownAreaId,jdbcType=INTEGER}
+    	</if>
+    	and is_stop = 0 
+    	limit #{offset,jdbcType=INTEGER},#{limit,jdbcType=INTEGER}
+    </where>
+  </select>
+  
+  <!-- 黑名单列表 -->
+  <select id="selectByPrimaryUserBlacklistList" parameterType="com.starface.domain.UserBlacklist" resultType="com.starface.domain.po.UserPo" >
+    select 
+     a.id,user_name as userName,nick_name nickName,code_name codeName,email_certified emailCertified,
+		sign aav,remark,user_icon userIcon,      gender,province_name as provinceName,city_name cityName,
+		area_name areaName,sign,remark,age,date_format(a.create_time,'%Y-%m-%d %H:%i:%s') createTime,school,
+		hometown_province_name hometownProvinceName,hometown_city_name hometownCityName,hometown_area_name hometownAreaName
+     from t_users a,t_user_blacklist b where a.id = b.user_id and 
+    	b.user_id = #{userId,javaType=INTEGER}
+  </select>
+  
+  <select id="getUserInfoSimple" parameterType="QueryVo" resultType="com.starface.domain.UserSimpleData" >
+    select
+     <include refid="Base_Column_List_PO" />
+     from t_users
+    <where>
+    	<if test="parameters.userName != null">
+    	and user_name = #{parameters.userName,jdbcType=VARCHAR} 
+    	</if>
+    	<if test="parameters.codeName != null">
+    	and code_name = #{parameters.codeName,jdbcType=VARCHAR} 
+    	</if>
+    	<if test="parameters.id != null">
+    	and  id = #{parameters.id,jdbcType=INTEGER}
+    	</if>
+    	<if test="parameters.ids != null ">
+    		and id in 
+    		<foreach collection="parameters.ids" item="id" index="i" open="(" separator="," close=")">
+				#{id}
+			</foreach>
+    	</if>
+    	and is_stop = 0 
+    </where>
+   </select>
+  <!-- 搜索好友 -->
+  <select id="getUserInfo" parameterType="QueryVo" resultType="com.starface.domain.po.UserPo" >
+    select
+     <include refid="Base_Column_List_PO" />
+     from t_users
+    <where>
+    	<if test="parameters.userName != null">
+    	and user_name = #{parameters.userName,jdbcType=VARCHAR} 
+    	</if>
+    	<if test="parameters.codeName != null">
+    	and code_name = #{parameters.codeName,jdbcType=VARCHAR} 
+    	</if>
+    	<if test="parameters.id != null">
+    	and  id = #{parameters.id,jdbcType=INTEGER}
+    	</if>
+    	<if test="parameters.ids != null ">
+    		and id in 
+    		<foreach collection="parameters.ids" item="id" index="i" open="(" separator="," close=")">
+				#{id}
+			</foreach>
+    	</if>
+    	and is_stop = 0 
+    </where>
+  </select>
+  
+  <!-- 搜索好友 -->
+  <select id="getUserByMobile" parameterType="QueryVo" resultType="com.starface.domain.Users" >
+    select
+     <include refid="Base_Column_List_PO" />
+     from t_users
+    	where mobile = #{parameters.mobile}
+    	and is_stop = 0 
+  </select>
+  
+  <!-- 添加好友 -->
+  <insert id="addFriend" parameterType="com.starface.domain.UserRelation" >
+    insert into t_user_relation(owner_username, friend_username, status,create_time)
+    values (#{owner_username,jdbcType=VARCHAR}, #{friend_username,jdbcType=VARCHAR}, 
+      #{status,jdbcType=INTEGER},current_timestamp())
+  </insert>
+  
+  <!-- 添加关注 -->
+  <insert id="addAttention" parameterType="com.starface.domain.UserRelation" >
+    insert into t_user_attention(owner_username, friend_username, status,create_time)
+    values (#{owner_username,jdbcType=VARCHAR}, #{friend_username,jdbcType=VARCHAR}, 
+      #{status,jdbcType=INTEGER},current_timestamp())
+  </insert>
+  
+  <!-- 删除好友 -->
+  <delete id="deleteFriend" parameterType="com.starface.domain.UserRelation" >
+    delete from t_user_relation where owner_username = #{owner_username,jdbcType=VARCHAR} 
+    and friend_username =  #{friend_username,jdbcType=VARCHAR}
+  </delete>
+  
+  <!-- 取消关注  -->
+  <delete id="cancelAttention" parameterType="com.starface.domain.UserRelation" >
+    delete from t_user_attention where owner_username = #{owner_username,jdbcType=VARCHAR} 
+    and friend_username =  #{friend_username,jdbcType=VARCHAR}
+  </delete>
+  
+  <!-- 列表 -->
+  <select id="getFriendList" parameterType="QueryVo" resultType="com.starface.domain.UserRelation">
+    select id,owner_username,friend_username, status from 
+     t_user_relation
+    where owner_username = #{owner_username,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 我关注列表最大ID -->
+  <select id="getAttentionMaxId" parameterType="com.starface.domain.UserRelation" resultType="java.lang.Integer">
+    select max(id) maxId from 
+     t_user_attention
+    where owner_username = #{owner_username,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 我被注列表最大ID -->
+  <select id="getAttentionBeiMaxId" parameterType="com.starface.domain.UserRelation" resultType="java.lang.Integer">
+    select max(id) maxId from 
+     t_user_attention
+    where friend_username = #{friend_username,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 关注列表 -->
+  <select id="getAttentionList" parameterType="java.util.HashMap" resultType="com.starface.domain.UserRelation">
+    select id,owner_username,friend_username, status from 
+     t_user_attention
+    where owner_username = #{userRelation.owner_username,jdbcType=VARCHAR} and id &lt;= #{nextCursor} order by id desc 
+    limit 0,30
+  </select>
+  
+  <!-- 我关注列表下一个ID -->
+  <select id="getAttentionNextId" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+    select id from 
+     t_user_attention
+    where owner_username = #{userRelation.owner_username,jdbcType=VARCHAR} and id &lt;= #{nextCursor} order by id desc 
+    limit 30,1
+  </select>
+  
+  <!-- 我被关注列表下一个ID -->
+  <select id="getAttentionBeiNextId" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+    select id from 
+     t_user_attention
+    where friend_username = #{userRelation.friend_username,jdbcType=VARCHAR} and id &lt;= #{nextCursor} order by id desc 
+    limit 30,1
+  </select>
+  
+  <!-- 被关注列表 -->
+  <select id="getAttentionBeiList" parameterType="java.util.HashMap" resultType="com.starface.domain.UserRelation">
+    select id,owner_username,friend_username, status from 
+     t_user_attention
+    where friend_username = #{userRelation.friend_username,jdbcType=VARCHAR} and id &lt;= #{nextCursor} order by id desc 
+    limit 0,30
+  </select>
+  
+  <!-- 查询是否已经是好友关系 -->
+  <select id="getFriend" parameterType="QueryVo" resultType="com.starface.domain.UserRelation">
+    select id,owner_username,friend_username, status from 
+     t_user_relation 
+    where owner_username = #{owner_username,jdbcType=VARCHAR} 
+    and friend_username =  #{friend_username,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 查询是否已经是关注过 -->
+  <select id="getAttention" parameterType="QueryVo" resultType="com.starface.domain.UserRelation">
+    select id,owner_username,friend_username, status from 
+     t_user_attention 
+    where owner_username = #{owner_username,jdbcType=VARCHAR} 
+    and friend_username =  #{friend_username,jdbcType=VARCHAR}
+  </select>
+  <!-- 我关注 列表最大ID -->
+  <select id="getAttentionMacId" parameterType="com.starface.domain.UserRelation" resultType="java.lang.Integer">
+    select max(id) maxId from 
+     t_user_attention
+    where owner_username = #{owner_username,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 更新经纬度 -->
+  <update id="uploadLocal" parameterType="com.starface.domain.query.UsersQuery">
+  update t_users set longitude = #{longitude} , latitude = #{latitude} , last_update_time = current_timestamp() 
+  where id = #{id}
+  </update>
+  
+  <!-- 搜索好友 -->
+  <select id="getUserById" parameterType="java.lang.Integer" resultType="com.starface.domain.po.UserPo" >
+    select
+     <include refid="Base_Column_List_PO" />,is_lock isLock,is_saymsg isSaymsg
+     from t_users
+     where id = #{userId}
+  </select>
+  
+  
+  <!-- 附近的人 -->
+  <select id="nearbyUser" parameterType="QueryVo" resultType="com.starface.domain.po.UserPo" >
+    
+    select * from (
+    select 
+     <include refid="Base_Column_List_PO" />,
+     round(
+		 6378.138 * 2 * asin(
+			sqrt(
+				pow(
+					sin(
+						(latitude * pi() / 180 - #{parameters.latitude} * pi() / 180) / 2
+					),
+					2
+				) + cos( latitude * pi() / 180) * cos(#{parameters.latitude} * pi() / 180) * pow(
+					sin(
+						(longitude * pi() / 180 - #{parameters.longitude} * pi() / 180) / 2
+					),
+					2
+				)
+			)
+		) * 1000
+    ) as dis
+     from t_users
+    <where>
+    	<if test="parameters.searchName != null">
+    	and (user_name like CONCAT('%',#{parameters.searchName,jdbcType=VARCHAR},'%' ) or
+    	 code_name like CONCAT('%',#{parameters.searchName,jdbcType=VARCHAR},'%' ))
+    	</if>
+    	<if test="parameters.gender != null and parameters.gender != 0">
+    	and  gender = #{parameters.gender,jdbcType=INTEGER}
+    	</if>
+    	<if test="parameters.endAge != 0 and null != parameters.endAge">
+    	<![CDATA[    
+    	and  age >= #{parameters.startAge,jdbcType=INTEGER} and age <= #{parameters.endAge,jdbcType=INTEGER} 
+    	]]>
+    	</if>
+    	<if test="parameters.provinceId != null">
+    	and  province_id = #{parameters.provinceId,jdbcType=INTEGER}
+    	</if>
+    	<if test="parameters.cityId != null">
+    	and  city_id = #{parameters.cityId,jdbcType=INTEGER}
+    	</if>
+    	<if test="parameters.areaId != null">
+    	and  area_id = #{parameters.areaId,jdbcType=INTEGER}
+    	</if>
+    	<if test="parameters.hometownProvinceId != null">
+    	and  hometown_province_id = #{parameters.hometownProvinceId,jdbcType=INTEGER}
+    	</if>
+    	<if test="parameters.hometownCityId != null">
+    	and  hometown_city_id = #{parameters.hometownCityId,jdbcType=INTEGER}
+    	</if>
+    	<if test="parameters.hometownAreaId != null">
+    	and  hometown_area_id = #{parameters.hometownAreaId,jdbcType=INTEGER}
+    	</if>
+    	and is_stop = 0 ) a where a.dis &lt;= 5120
+    	limit #{offset,jdbcType=INTEGER},#{limit,jdbcType=INTEGER}
+    </where>
+  </select>
+  
+  <!-- 附近的人 -->
+  <select id="nearbyUserCount" parameterType="QueryVo" resultType="java.lang.Integer" >
+    select count(1) cnt from (
+    select 
+     <include refid="Base_Column_List_PO" />,
+     round(
+		 6378.138 * 2 * asin(
+			sqrt(
+				pow(
+					sin(
+						(latitude * pi() / 180 - #{parameters.latitude} * pi() / 180) / 2
+					),
+					2
+				) + cos( latitude * pi() / 180) * cos(#{parameters.latitude} * pi() / 180) * pow(
+					sin(
+						(longitude * pi() / 180 - #{parameters.longitude} * pi() / 180) / 2
+					),
+					2
+				)
+			)
+		) * 1000
+    ) as dis
+     from t_users
+    <where>
+    	<if test="parameters.searchName != null">
+    	and (user_name like CONCAT('%',#{parameters.searchName,jdbcType=VARCHAR},'%' ) or
+    	 code_name like CONCAT('%',#{parameters.searchName,jdbcType=VARCHAR},'%' ))
+    	</if>
+    	<if test="parameters.gender != null and parameters.gender != 0">
+    	and  gender = #{parameters.gender,jdbcType=INTEGER}
+    	</if>
+    	<if test="parameters.endAge != 0 and null != parameters.endAge">
+    	<![CDATA[    
+    	and  age >= #{parameters.startAge,jdbcType=INTEGER} and age <= #{parameters.endAge,jdbcType=INTEGER} 
+    	]]>
+    	</if>
+    	<if test="parameters.provinceId != null">
+    	and  province_id = #{parameters.provinceId,jdbcType=INTEGER}
+    	</if>
+    	<if test="parameters.cityId != null">
+    	and  city_id = #{parameters.cityId,jdbcType=INTEGER}
+    	</if>
+    	<if test="parameters.areaId != null">
+    	and  area_id = #{parameters.areaId,jdbcType=INTEGER}
+    	</if>
+    	<if test="parameters.hometownProvinceId != null">
+    	and  hometown_province_id = #{parameters.hometownProvinceId,jdbcType=INTEGER}
+    	</if>
+    	<if test="parameters.hometownCityId != null">
+    	and  hometown_city_id = #{parameters.hometownCityId,jdbcType=INTEGER}
+    	</if>
+    	<if test="parameters.hometownAreaId != null">
+    	and  hometown_area_id = #{parameters.hometownAreaId,jdbcType=INTEGER}
+    	</if>
+    	and is_stop = 0 ) a where a.dis &lt;= 5120
+    </where>
+  </select>
+  
+  <!-- 发现 -->
+  <select id="discover" parameterType="QueryVo" resultType="com.starface.domain.po.UserPo" >
+    
+    select 
+     <include refid="Base_Column_List_PO" />
+     from t_users
+    <where>
+    	<if test="parameters.searchName != null">
+    	and (user_name like CONCAT('%',#{parameters.searchName,jdbcType=VARCHAR},'%' ) or
+    	 code_name like CONCAT('%',#{parameters.searchName,jdbcType=VARCHAR},'%' ))
+    	</if>
+    	<if test="parameters.gender != null and parameters.gender != 0">
+    	and  gender = #{parameters.gender,jdbcType=INTEGER}
+    	</if>
+    	<if test="parameters.endAge != 0 and null != parameters.endAge">
+    	<![CDATA[    
+    	and  age >= #{parameters.startAge,jdbcType=INTEGER} and age <= #{parameters.endAge,jdbcType=INTEGER} 
+    	]]>
+    	</if>
+    	<if test="parameters.provinceId != null">
+    	and  province_id = #{parameters.provinceId,jdbcType=INTEGER}
+    	</if>
+    	<if test="parameters.cityId != null">
+    	and  city_id = #{parameters.cityId,jdbcType=INTEGER}
+    	</if>
+    	<if test="parameters.areaId != null">
+    	and  area_id = #{parameters.areaId,jdbcType=INTEGER}
+    	</if>
+    	<if test="parameters.hometownProvinceId != null">
+    	and  hometown_province_id = #{parameters.hometownProvinceId,jdbcType=INTEGER}
+    	</if>
+    	<if test="parameters.hometownCityId != null">
+    	and  hometown_city_id = #{parameters.hometownCityId,jdbcType=INTEGER}
+    	</if>
+    	<if test="parameters.hometownAreaId != null">
+    	and  hometown_area_id = #{parameters.hometownAreaId,jdbcType=INTEGER}
+    	</if>
+    	and is_stop = 0 order by RAND()
+    	limit 20
+    </where>
+  </select>
+  <select id="sysLogin" parameterType="com.starface.domain.query.UsersQuery" resultType="java.lang.Integer" >
+  select count(1) cnt from t_sys_user where user_name = #{userName} and pwd = #{pwd}
+  </select>
+  
+  <select id="sysUserList" parameterType="com.starface.domain.query.UsersQuery" resultType="com.starface.domain.query.UsersQuery" >
+	  select <include refid="Base_Column_List_PO" />,is_lock isLock,is_saymsg isSaymsg,date_format(create_time,'%Y-%m-%d %H:%i:%s') createTimeView from t_users where 1 = 1
+	  <if test="userName != null">
+	    	and user_name = #{userName}
+	  </if>
+	  <if test="nickName != null">
+	    	and nick_name = #{nickName}
+	  </if>
+	  <if test="codeName != null">
+	    	and code_name = #{codeName}
+	  </if>
+   	  order by id desc 
+   	  <if test="start != null">
+   	  limit ${start * limit} ,#{limit}
+   	  </if>
+  </select>
+  
+  <select id="sysUserListCount" parameterType="com.starface.domain.query.UsersQuery" resultType="Integer" >
+	  select count(1) cnt from t_users where 1 = 1
+	  <if test="userName != null">
+	    	and user_name = #{userName}
+	  </if>
+	  <if test="nickName != null">
+	    	and nick_name = #{nickName}
+	  </if>
+	  <if test="codeName != null">
+	    	and code_name = #{codeName}
+	  </if>
+  </select>
+  <!-- 锁定用户 -->
+  <update id="lockUser" parameterType="com.starface.domain.query.UsersQuery" >
+  update t_users set is_lock = 1 where id = #{id}
+  </update>
+  <!-- 解锁用户 -->
+  <update id="unlockUser" parameterType="com.starface.domain.query.UsersQuery" >
+  update t_users set is_lock = 0 where id = #{id}
+  </update>
+  
+  <!-- 禁用用户发言 -->
+  <update id="saymsgUser" parameterType="com.starface.domain.query.UsersQuery" >
+  update t_users set is_saymsg = 1 where id = #{id}
+  </update>
+  <!-- 解禁用户发言 -->
+  <update id="unsaymsgUser" parameterType="com.starface.domain.query.UsersQuery" >
+  update t_users set is_saymsg = 0 where id = #{id}
+  </update>
+  
+</mapper>

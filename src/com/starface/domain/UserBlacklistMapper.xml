@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.starface.domain.UserBlacklistMapper" >
+  <resultMap id="BaseResultMap" type="com.starface.domain.UserBlacklist" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="user_id" property="userId" jdbcType="INTEGER" />
+    <result column="blacklist_user" property="blacklistUser" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, user_id, blacklist_user, create_time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_user_blacklist
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryUserBlacklist" parameterType="com.starface.domain.UserBlacklist" >
+    delete from t_user_blacklist
+    where user_id = #{userId,jdbcType=INTEGER} and blacklist_user = #{blacklistUser,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.starface.domain.UserBlacklist" >
+    insert into t_user_blacklist ( user_id, blacklist_user)
+    values (#{userId,jdbcType=INTEGER}, #{blacklistUser,jdbcType=INTEGER})
+  </insert>
+  
+  
+  <select id="selectByPrimaryUserBlacklist" resultMap="BaseResultMap" parameterType="com.starface.domain.UserBlacklist" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_user_blacklist a
+    where 1 = 1
+    <if test="userId != null">
+    and a.user_id = #{userId,javaType=INTEGER}#
+    </if>
+    <if test="blacklistUser != null">
+    and a.blacklist_user = #{blacklistUser,javaType=INTEGER}#
+    </if>
+    <if test="id != null">
+    and a.id = #{id,javaType=INTEGER}#
+    </if>
+  </select>
+</mapper>
